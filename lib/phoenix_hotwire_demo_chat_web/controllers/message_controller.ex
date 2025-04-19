@@ -1,5 +1,6 @@
 defmodule PhoenixHotwireDemoChatWeb.MessageController do
   use PhoenixHotwireDemoChatWeb, :controller
+  plug :accepts, ["html", "turbo_stream"] when action in [:create]
 
   alias PhoenixHotwireDemoChat.Chat
   alias PhoenixHotwireDemoChat.Chat.Message
