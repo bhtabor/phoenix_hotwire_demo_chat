@@ -1,7 +1,7 @@
-<.form :let={f} for={@changeset} action={@action}>
+<.form :let={f} for={@changeset} action={@action} data-turbo-frame="_top">
   <.input field={f[:content]} type="text" label="Content" />
   <footer>
     <.button variant="primary">Save Message</.button>
-    <.button :if={@return_to} href={@return_to}>Cancel</.button>
+    <.button :if={@return_to} href={@return_to} data-turbo-frame="_top">Cancel</.button>
   </footer>
 </.form>
