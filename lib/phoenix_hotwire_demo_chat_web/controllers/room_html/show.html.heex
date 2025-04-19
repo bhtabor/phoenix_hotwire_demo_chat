@@ -6,11 +6,13 @@
       <.button navigate={~p"/rooms"}>
         <.icon name="hero-arrow-left" />
       </.button>
-      <.button variant="primary" navigate={~p"/rooms/#{@room}/messages/new"}>
+      <.button variant="primary" navigate={~p"/rooms/#{@room}/messages/new"} data-turbo-frame={"room-#{@room.id}-new-message"}>
         <.icon name="hero-plus" /> New message
       </.button>
     </:actions>
   </.header>
+
+  <.turbo_frame id={"room-#{@room.id}-new-message"} />
 
   <.list>
     <:item title="Name">{@room.name}</:item>
