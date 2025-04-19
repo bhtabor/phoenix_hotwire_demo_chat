@@ -1,5 +1,6 @@
 defmodule PhoenixHotwireDemoChatWeb.MessageController do
   use PhoenixHotwireDemoChatWeb, :controller
+  plug :accepts, ["html", "turbo_stream"] when action in [:create]
 
   alias PhoenixHotwireDemoChat.Chat
   alias PhoenixHotwireDemoChat.Chat.Message
@@ -12,10 +13,19 @@ defmodule PhoenixHotwireDemoChatWeb.MessageController do
   def create(conn, %{"room_id" => room_id, "message" => message_params}) do
     case Chat.create_message(Map.merge(message_params, %{"room_id" => room_id})) do
       {:ok, _message} ->
-        conn
-        |> put_flash(:info, "Message created successfully.")
-        |> put_status(:see_other)
-        |> redirect(to: ~p"/rooms/#{room_id}")
+        turbo_frame = Map.get(conn.assigns, :turbo_frame)
+        frame_id = "room-#{room_id}-new-message"
+
+        case turbo_frame do
+          ^frame_id ->
+            changeset = Chat.change_message(%Message{}, %{"room_id" => room_id})
+            render(conn, :new, changeset: changeset)
+          _ ->
+            conn
+            |> put_flash(:info, "Message created successfully.")
+            |> put_status(:see_other)
+            |> redirect(to: ~p"/rooms/#{room_id}")
+        end
 
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
