@@ -13,6 +13,8 @@ defmodule PhoenixHotwireDemoChatWeb.MessageController do
   def create(conn, %{"room_id" => room_id, "message" => message_params}) do
     case Chat.create_message(Map.merge(message_params, %{"room_id" => room_id})) do
       {:ok, _message} ->
+        broadcast_room_turbo_stream_refresh(conn, room_id, debounced: false)
+
         turbo_frame = Map.get(conn.assigns, :turbo_frame)
         frame_id = "room-#{room_id}-new-message"
 
@@ -39,9 +41,15 @@ defmodule PhoenixHotwireDemoChatWeb.MessageController do
     message = Chat.get_message!(id)
     {:ok, _message} = Chat.delete_message(message)
 
+    broadcast_room_turbo_stream_refresh(conn, message.room_id)
+
     conn
     |> put_flash(:info, "Message deleted successfully.")
     |> put_status(:see_other)
     |> redirect(to: ~p"/rooms/#{message.room_id}")
+  end
+
+  defp broadcast_room_turbo_stream_refresh(conn, room_id, opts \\ []) do
+    broadcast_turbo_stream_refresh(conn, "turbo_stream:room:#{room_id}", opts)
   end
 end
