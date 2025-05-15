@@ -1,3 +1,5 @@
+<.turbo_stream_channel_source topic={"turbo_stream:room:#{@room.id}"} />
+
 <Layouts.app flash={@flash}>
   <.header>
     Room {@room.id}
@@ -12,7 +14,7 @@
     </:actions>
   </.header>
 
-  <.turbo_frame id={"room-#{@room.id}-new-message"} />
+  <.turbo_frame id={"room-#{@room.id}-new-message"} data-turbo-permanent />
 
   <.list>
     <:item title="Name">{@room.name}</:item>

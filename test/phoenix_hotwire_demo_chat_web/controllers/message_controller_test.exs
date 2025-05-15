@@ -2,6 +2,7 @@ defmodule PhoenixHotwireDemoChatWeb.MessageControllerTest do
   use PhoenixHotwireDemoChatWeb.ConnCase
 
   import PhoenixHotwireDemoChat.ChatFixtures
+  alias Phoenix.Socket.Broadcast
 
   @create_attrs %{content: "some content"}
   @invalid_attrs %{content: nil}
@@ -18,27 +19,45 @@ defmodule PhoenixHotwireDemoChatWeb.MessageControllerTest do
   describe "create message" do
     setup [:create_room]
 
-    test "redirects to show when data is valid", %{conn: conn, room: room} do
+    test "broadcasts and redirects to show when data is valid", %{conn: conn, room: room} do
+      topic = subscribe_room_turbo_stream(room.id)
+
       conn = post(conn, ~p"/rooms/#{room}/messages", message: @create_attrs)
+
+      assert_receive %Broadcast{event: "message", topic: ^topic, payload: %{data: stream}}
+      assert stream =~ "<turbo-stream action=\"refresh\">"
+
       assert redirected_to(conn, 303) == ~p"/rooms/#{room}"
     end
 
-    test "renders new on html request from a matching turbo frame when data is valid", %{conn: conn, room: room} do
+    test "broadcasts and renders new on html request from a matching turbo frame when data is valid", %{conn: conn, room: room} do
+      topic = subscribe_room_turbo_stream(room.id)
+
       conn =
         conn
         |> put_req_header("accept", "text/html")
         |> put_req_header("turbo-frame", "room-#{room.id}-new-message")
+        |> put_req_header("x-turbo-request-id", "turbo-request-id")
         |> post(~p"/rooms/#{room}/messages", message: @create_attrs)
+
+      assert_receive %Broadcast{event: "message", topic: ^topic, payload: %{data: stream}}
+      assert stream =~ "<turbo-stream action=\"refresh\">"
 
       assert html_response(conn, 200) =~ "New Message"
     end
 
-    test "renders new on turbo stream request from a matching turbo frame when data is valid", %{conn: conn, room: room} do
+    test "broadcasts and renders new on turbo stream request from a matching turbo frame when data is valid", %{conn: conn, room: room} do
+      topic = subscribe_room_turbo_stream(room.id)
+
       conn =
         conn
         |> put_req_header("accept", "text/vnd.turbo-stream.html, text/html")
         |> put_req_header("turbo-frame", "room-#{room.id}-new-message")
+        |> put_req_header("x-turbo-request-id", "turbo-request-id")
         |> post(~p"/rooms/#{room}/messages", message: @create_attrs)
+
+      assert_receive %Broadcast{event: "message", topic: ^topic, payload: %{data: stream}}
+      assert stream =~ "<turbo-stream action=\"refresh\">"
 
       assert turbo_stream_response(conn, 200) =~ "Save Message"
     end
@@ -52,8 +71,17 @@ defmodule PhoenixHotwireDemoChatWeb.MessageControllerTest do
   describe "delete message" do
     setup [:create_message]
 
-    test "deletes chosen message", %{conn: conn, message: message} do
-      conn = delete(conn, ~p"/messages/#{message}")
+    test "deletes chosen message and broadcasts", %{conn: conn, message: message} do
+      topic = subscribe_room_turbo_stream(message.room_id)
+
+      conn =
+        conn
+        |> put_req_header("x-turbo-request-id", "turbo-request-id")
+        |> delete(~p"/messages/#{message}")
+
+      assert_receive %Broadcast{event: "message", topic: ^topic, payload: %{data: stream}}
+      assert stream =~ "<turbo-stream action=\"refresh\" request-id=\"turbo-request-id\">"
+
       assert redirected_to(conn, 303) == ~p"/rooms/#{message.room_id}"
 
       assert_error_sent 404, fn ->
@@ -73,5 +101,12 @@ defmodule PhoenixHotwireDemoChatWeb.MessageControllerTest do
     message = message_fixture(%{room_id: room.id})
 
     %{message: message}
+  end
+
+  defp subscribe_room_turbo_stream(room_id) do
+    topic = "turbo_stream:room:#{room_id}"
+    PhoenixHotwireDemoChatWeb.Endpoint.subscribe(topic)
+
+    topic
   end
 end
