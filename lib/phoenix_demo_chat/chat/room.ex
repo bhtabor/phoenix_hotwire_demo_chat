@@ -5,6 +5,8 @@ defmodule PhoenixDemoChat.Chat.Room do
   schema "rooms" do
     field :name, :string
 
+    has_many :messages, PhoenixDemoChat.Chat.Message, preload_order: [desc: :id]
+
     timestamps(type: :utc_datetime)
   end
 

@@ -17,7 +17,11 @@ defmodule PhoenixDemoChat.ChatTest do
 
     test "get_room!/1 returns the room with given id" do
       room = room_fixture()
+      message = message_fixture(%{room_id: room.id})
       assert Chat.get_room!(room.id) == room
+
+      messages = room |> Chat.preload_messages() |> Map.get(:messages)
+      assert messages == [message]
     end
 
     test "create_room/1 with valid data creates a room" do
@@ -54,6 +58,45 @@ defmodule PhoenixDemoChat.ChatTest do
     test "change_room/1 returns a room changeset" do
       room = room_fixture()
       assert %Ecto.Changeset{} = Chat.change_room(room)
+    end
+  end
+
+  describe "messages" do
+    alias PhoenixDemoChat.Chat.Message
+
+    import PhoenixDemoChat.ChatFixtures
+
+    @invalid_attrs %{content: nil}
+
+    test "get_message!/1 returns the message with given id" do
+      room = room_fixture()
+      message = message_fixture(%{room_id: room.id})
+      assert Chat.get_message!(message.id) == message
+    end
+
+    test "create_message/1 with valid data creates a message" do
+      room = room_fixture()
+      valid_attrs = %{room_id: room.id, content: "some content"}
+
+      assert {:ok, %Message{} = message} = Chat.create_message(valid_attrs)
+      assert message.content == "some content"
+    end
+
+    test "create_message/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Chat.create_message(@invalid_attrs)
+    end
+
+    test "delete_message/1 deletes the message" do
+      room = room_fixture()
+      message = message_fixture(%{room_id: room.id})
+      assert {:ok, %Message{}} = Chat.delete_message(message)
+      assert_raise Ecto.NoResultsError, fn -> Chat.get_message!(message.id) end
+    end
+
+    test "change_message/1 returns a message changeset" do
+      room = room_fixture()
+      message = message_fixture(%{room_id: room.id})
+      assert %Ecto.Changeset{} = Chat.change_message(message)
     end
   end
 end

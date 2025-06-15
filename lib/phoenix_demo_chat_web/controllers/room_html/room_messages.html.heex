@@ -1,0 +1,10 @@
+<div id="room-messages">
+  <.table id="messages" rows={@room.messages}>
+    <:col :let={message} label="Messages">{message.content}</:col>
+    <:action :let={message}>
+      <.link href={~p"/messages/#{message}"} method="delete" data-confirm="Are you sure?">
+        Delete
+      </.link>
+    </:action>
+  </.table>
+</div>

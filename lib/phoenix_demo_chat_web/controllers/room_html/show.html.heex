@@ -1,6 +1,6 @@
 <Layouts.app flash={@flash}>
   <.header>
-    Room {@room.id}
+    {@room.name}
     <:subtitle>This is a room record from your database.</:subtitle>
     <:actions>
       <.button navigate={~p"/rooms"}>
@@ -12,7 +12,5 @@
     </:actions>
   </.header>
 
-  <.list>
-    <:item title="Name">{@room.name}</:item>
-  </.list>
+  <.room_messages room={@room} />
 </Layouts.app>
