@@ -1,0 +1,8 @@
+<Layouts.app flash={@flash}>
+  <.header>
+    New Room
+    <:subtitle>Use this form to manage room records in your database.</:subtitle>
+  </.header>
+
+  <.room_form changeset={@changeset} action={~p"/rooms"} return_to={~p"/rooms"} />
+</Layouts.app>

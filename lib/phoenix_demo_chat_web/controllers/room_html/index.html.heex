@@ -1,0 +1,25 @@
+<Layouts.app flash={@flash}>
+  <.header>
+    Listing Rooms
+    <:actions>
+      <.button href={~p"/rooms/new"}>
+        <.icon name="hero-plus" /> New Room
+      </.button>
+    </:actions>
+  </.header>
+
+  <.table id="rooms" rows={@rooms} row_click={&JS.navigate(~p"/rooms/#{&1}")}>
+    <:col :let={room} label="Name">{room.name}</:col>
+    <:action :let={room}>
+      <div class="sr-only">
+        <.link navigate={~p"/rooms/#{room}"}>Show</.link>
+      </div>
+      <.link navigate={~p"/rooms/#{room}/edit"}>Edit</.link>
+    </:action>
+    <:action :let={room}>
+      <.link href={~p"/rooms/#{room}"} method="delete" data-confirm="Are you sure?">
+        Delete
+      </.link>
+    </:action>
+  </.table>
+</Layouts.app>
