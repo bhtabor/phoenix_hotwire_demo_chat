@@ -4,5 +4,7 @@
     <:subtitle>Use this form to manage message records in your database.</:subtitle>
   </.header>
 
-  <.message_form changeset={@changeset} action={~p"/rooms/#{@changeset.changes.room_id}/messages"} />
+  <.turbo_frame id="new-message">
+    <.message_form changeset={@changeset} action={~p"/rooms/#{@changeset.changes.room_id}/messages"} />
+  </.turbo_frame>
 </Layouts.app>

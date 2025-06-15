@@ -12,5 +12,10 @@
     </:actions>
   </.header>
 
+  <div class="p-4">
+    <h3 class="text-sm font-semibold">New Message</h3>
+    <.turbo_frame id="new-message" src={~p"/rooms/#{@room}/messages/new"} data-turbo-permanent />
+  </div>
+
   <.room_messages room={@room} />
 </Layouts.app>
