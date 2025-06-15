@@ -23,9 +23,18 @@ defmodule PhoenixDemoChatWeb.MessageControllerTest do
       assert redirected_to(conn, 303) == ~p"/rooms/#{room}"
     end
 
-    test "renders errors when data is invalid", %{conn: conn, room: room} do
+    test "renders errors on html request when data is invalid", %{conn: conn, room: room} do
       conn = post(conn, ~p"/rooms/#{room}/messages", message: @invalid_attrs)
       assert html_response(conn, 422) =~ "New Message"
+    end
+
+    test "renders errors on turbo stream request when data is invalid", %{conn: conn, room: room} do
+      conn =
+        conn
+        |> put_req_header("accept", "text/vnd.turbo-stream.html, text/html")
+        |> post(~p"/rooms/#{room}/messages", message: @invalid_attrs)
+
+      assert turbo_stream_response(conn, 422) =~ "can&#39;t be blank"
     end
   end
 
