@@ -43,6 +43,7 @@ defmodule PhoenixDemoChatWeb.RoomControllerTest do
 
     test "renders form", %{conn: conn, room: room} do
       conn = get(conn, ~p"/rooms/#{room}")
+      assert html_response(conn, 200) =~ "<turbo-stream-channel-source topic=\"turbo_stream:room:#{room.id}\""
       assert html_response(conn, 200) =~ room.name
     end
   end
