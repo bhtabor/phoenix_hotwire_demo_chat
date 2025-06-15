@@ -1,6 +1,6 @@
 <.turbo_stream_channel_source topic={"turbo_stream:room:#{@room.id}"} />
 
-<Layouts.app flash={@flash}>
+<Layouts.app request_id={@phx_request_id} flash={@flash}>
   <.header>
     {@room.name}
     <:subtitle>This is a room record from your database.</:subtitle>

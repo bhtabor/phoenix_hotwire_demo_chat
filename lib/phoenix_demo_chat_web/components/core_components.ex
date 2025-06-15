@@ -40,6 +40,7 @@ defmodule PhoenixDemoChatWeb.CoreComponents do
       <.flash kind={:info} phx-mounted={show("#flash")}>Welcome Back!</.flash>
   """
   attr :id, :string, doc: "the optional id of flash container"
+  attr :request_id, :string, default: nil
   attr :flash, :map, default: %{}, doc: "the map of flash messages to display"
   attr :title, :string, default: nil
   attr :kind, :atom, values: [:info, :error], doc: "used for styling and flash lookup"
@@ -48,7 +49,7 @@ defmodule PhoenixDemoChatWeb.CoreComponents do
   slot :inner_block, doc: "the optional inner block that renders the flash message"
 
   def flash(assigns) do
-    assigns = assign_new(assigns, :id, fn -> "flash-#{assigns.kind}" end)
+    assigns = assign_new(assigns, :id, fn -> "flash-#{assigns.request_id}-#{assigns.kind}" end)
 
     ~H"""
     <div
@@ -56,7 +57,6 @@ defmodule PhoenixDemoChatWeb.CoreComponents do
       id={@id}
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
-      class="toast toast-top toast-end z-50"
       {@rest}
     >
       <div class={[
